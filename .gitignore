@@ -1,3 +1,5 @@
 build
 .vscode
 *.so
+*.pyc
+__pycache__

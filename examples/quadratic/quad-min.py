@@ -1,10 +1,9 @@
-from pywrapper import *
+from mma4py import Problem, Optimizer
 from mpi4py import MPI
 import numpy as np
 
 
 class Prob(Problem):
-
     def __init__(self, comm, nvars, nvars_l):
         super().__init__(comm, nvars, nvars_l, 1)
         self.comm = comm
@@ -32,7 +31,6 @@ class Prob(Problem):
 
 
 comm = MPI.COMM_WORLD
-initialize(comm)
 
 nvars = 1000
 nvars_l = nvars // comm.size
@@ -40,7 +38,5 @@ for i in range(nvars % comm.size):
     nvars_l += 1
 
 prob = Prob(comm, nvars, nvars_l)
-
 opt = Optimizer(prob)
 opt.optimize(10)
-
