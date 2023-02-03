@@ -1,4 +1,3 @@
-
 #include "MMA.h"
 
 #include <math.h>
@@ -21,15 +20,14 @@ License along with this Module; if not, write to the Free Software
 Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 -------------------------------------------------------------------------- */
 
-MMA::MMA(MPI_Comm comm, PetscInt nn, PetscInt mm, PetscInt kk, Vec xo1t,
-         Vec xo2t, Vec Ut, Vec Lt, PetscScalar* at, PetscScalar* ct,
-         PetscScalar* dt)
-    : comm(comm) {
+MMA::MMA(PetscInt nn, PetscInt mm, PetscInt kk, Vec xo1t, Vec xo2t, Vec Ut,
+         Vec Lt, PetscScalar* at, PetscScalar* ct, PetscScalar* dt) {
   n = nn;
   m = mm;
   k = kk;
   if (k < 3) {
-    PetscPrintf(comm, "NOT A LEGAL RESTART POINT (k<3): EXPECT BREAKDOWN\n");
+    PetscPrintf(PETSC_COMM_WORLD,
+                "NOT A LEGAL RESTART POINT (k<3): EXPECT BREAKDOWN\n");
   }
 
   asyminit = 0.5;
@@ -109,14 +107,14 @@ MMA::MMA(MPI_Comm comm, PetscInt nn, PetscInt mm, PetscInt kk, Vec xo1t,
   VecRestoreArray(L, &pL);
 }
 
-MMA::MMA(MPI_Comm comm, PetscInt nn, PetscInt mm, PetscInt kk, Vec xo1t,
-         Vec xo2t, Vec Ut, Vec Lt)
-    : comm(comm) {
+MMA::MMA(PetscInt nn, PetscInt mm, PetscInt kk, Vec xo1t, Vec xo2t, Vec Ut,
+         Vec Lt) {
   n = nn;
   m = mm;
   k = kk;
   if (k < 3) {
-    PetscPrintf(comm, "NOT A LEGAL RESTART POINT (k<3): EXPECT BREAKDOWN\n");
+    PetscPrintf(PETSC_COMM_WORLD,
+                "NOT A LEGAL RESTART POINT (k<3): EXPECT BREAKDOWN\n");
   }
 
   asyminit = 0.5;
@@ -198,9 +196,8 @@ MMA::MMA(MPI_Comm comm, PetscInt nn, PetscInt mm, PetscInt kk, Vec xo1t,
   VecRestoreArray(L, &pL);
 }
 
-MMA::MMA(MPI_Comm comm, PetscInt nn, PetscInt mm, Vec x, PetscScalar* at,
-         PetscScalar* ct, PetscScalar* dt)
-    : comm(comm) {
+MMA::MMA(PetscInt nn, PetscInt mm, Vec x, PetscScalar* at, PetscScalar* ct,
+         PetscScalar* dt) {
   n = nn;
   m = mm;
 
@@ -248,7 +245,7 @@ MMA::MMA(MPI_Comm comm, PetscInt nn, PetscInt mm, Vec x, PetscScalar* at,
   Hess = new PetscScalar[m * m];
 }
 
-MMA::MMA(MPI_Comm comm, PetscInt nn, PetscInt mm, Vec x) : comm(comm) {
+MMA::MMA(PetscInt nn, PetscInt mm, Vec x) {
   n = nn;
   m = mm;
 
@@ -385,8 +382,8 @@ PetscErrorCode MMA::SetRobustAsymptotesType(PetscInt val) {
   } else {
     RobustAsymptotesType = 0;
     PetscPrintf(
-        comm, "ERROR in MMA.cc/h: RobustAsymptotesType cannot be set to: %d \n",
-        val);
+        PETSC_COMM_WORLD,
+        "ERROR in MMA.cc/h: RobustAsymptotesType cannot be set to: %d \n", val);
   }
   return ierr;
 }
@@ -424,7 +421,7 @@ PetscScalar MMA::DesignChange(Vec x, Vec xold) {
     xo[i] = xv[i];
   }
   PetscScalar tmp;
-  MPI_Allreduce(&ch, &tmp, 1, MPIU_SCALAR, MPI_MAX, comm);
+  MPI_Allreduce(&ch, &tmp, 1, MPIU_SCALAR, MPI_MAX, PETSC_COMM_WORLD);
   ch = tmp;
   VecRestoreArray(x, &xv);
   VecRestoreArray(xold, &xo);
@@ -491,8 +488,8 @@ PetscErrorCode MMA::KKTresidual(Vec x, Vec dfdx, PetscScalar* fx, Vec* dgdx,
   PetscScalar nItmp = normInf[0];
   norm2[0] = 0.0;
   normInf[0] = 0.0;
-  MPI_Allreduce(&n2tmp, norm2, 1, MPIU_SCALAR, MPI_SUM, comm);
-  MPI_Allreduce(&nItmp, normInf, 1, MPIU_SCALAR, MPI_MAX, comm);
+  MPI_Allreduce(&n2tmp, norm2, 1, MPIU_SCALAR, MPI_SUM, PETSC_COMM_WORLD);
+  MPI_Allreduce(&nItmp, normInf, 1, MPIU_SCALAR, MPI_MAX, PETSC_COMM_WORLD);
   ri = 0.0;
   for (PetscInt j = 0; j < m; j++) {
     ri += lam[j] * (a[j] * z + y[j] - fx[j]);
@@ -639,7 +636,7 @@ PetscErrorCode MMA::GenSub(Vec xval, Vec dfdx, PetscScalar* gx, Vec* dgdx,
     for (PetscInt i = 0; i < m; i++) {
       tmp[i] = 0.0;
     }
-    MPI_Allreduce(b, tmp, m, MPIU_SCALAR, MPI_SUM, comm);
+    MPI_Allreduce(b, tmp, m, MPIU_SCALAR, MPI_SUM, PETSC_COMM_WORLD);
     memcpy(b, tmp, sizeof(PetscScalar) * m);
     delete[] tmp;
   }
@@ -777,7 +774,7 @@ PetscErrorCode MMA::DualGrad(Vec x) {
     for (PetscInt i = 0; i < m; i++) {
       tmp[i] = 0.0;
     }
-    MPI_Allreduce(grad, tmp, m, MPIU_SCALAR, MPI_SUM, comm);
+    MPI_Allreduce(grad, tmp, m, MPIU_SCALAR, MPI_SUM, PETSC_COMM_WORLD);
     memcpy(grad, tmp, sizeof(PetscScalar) * m);
     delete[] tmp;
   }
@@ -850,7 +847,7 @@ PetscErrorCode MMA::DualHess(Vec x) {
     for (PetscInt i = 0; i < m * m; i++) {
       tmpp[i] = Hess[i];
     }
-    MPI_Allreduce(Hess, tmpp, m * m, MPIU_SCALAR, MPI_SUM, comm);
+    MPI_Allreduce(Hess, tmpp, m * m, MPIU_SCALAR, MPI_SUM, PETSC_COMM_WORLD);
     memcpy(Hess, tmpp, sizeof(PetscScalar) * m * m);
     delete[] tmpp;
   }
@@ -940,7 +937,7 @@ PetscScalar MMA::DualResidual(Vec x, PetscScalar epsi) {
     for (PetscInt i = 0; i < 2 * m; i++) {
       tmp[i] = 0.0;
     }
-    MPI_Allreduce(res, tmp, 2 * m, MPIU_SCALAR, MPI_SUM, comm);
+    MPI_Allreduce(res, tmp, 2 * m, MPIU_SCALAR, MPI_SUM, PETSC_COMM_WORLD);
     memcpy(res, tmp, sizeof(PetscScalar) * 2 * m);
     delete[] tmp;
   }
