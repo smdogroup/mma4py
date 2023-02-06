@@ -17,7 +17,7 @@ class Problem:
     sizes of these vectors are the same.
 
     Note2: Assume constraints take the following form:
-            c(x) >= 0
+            c(x) <= 0
     """
 
     def __init__(
@@ -26,6 +26,13 @@ class Problem:
         nvars: int,
         nvars_l: int,
         ncons: int,
+    ) -> None:
+        pass
+    def getVarsAndBounds(
+        self,
+        x: numpy.ndarray,
+        lb: numpy.ndarray,
+        ub: numpy.ndarray,
     ) -> None:
         pass
     def evalObjCon(
@@ -43,8 +50,9 @@ class Problem:
     pass
 
 class Optimizer:
-    def __init__(self, prob: Problem) -> None: ...
+    def __init__(self, prob: Problem, log_name: str) -> None: ...
     def optimize(self, niter: int) -> int: ...
+    def getOptimizedDesign(self) -> numpy.ndarray: ...
     pass
 
 def _petsc_initialize() -> None:

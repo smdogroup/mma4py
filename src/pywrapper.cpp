@@ -19,6 +19,14 @@ class PyProblem : public Problem {
   using Problem::Problem;
 
   // Trampoline for pure virtual functions
+  void getVarsAndBounds(ndarray_t x, ndarray_t lb, ndarray_t ub) override {
+    PYBIND11_OVERRIDE_PURE(void,              // return type
+                           Problem,           // Parent class
+                           getVarsAndBounds,  // name of function
+                           x, lb, ub          // Argument(s), if any
+    );
+  }
+
   double evalObjCon(ndarray_t x, ndarray_t cons) override {
     PYBIND11_OVERRIDE_PURE(double,      // return type
                            Problem,     // Parent class
@@ -57,12 +65,14 @@ PYBIND11_MODULE(pywrapper, m) {
 
   py::class_<Problem, PyProblem>(m, "Problem")
       .def(py::init<py::object, int, int, int>())
+      .def("getVarsAndBounds", &Problem::getVarsAndBounds)
       .def("evalObjCon", &Problem::evalObjCon)
       .def("evalObjConGrad", &Problem::evalObjConGrad);
 
   py::class_<Optimizer>(m, "Optimizer")
-      .def(py::init<Problem*>())
-      .def("optimize", &Optimizer::optimize);
+      .def(py::init<Problem*, const char*>())
+      .def("optimize", &Optimizer::optimize)
+      .def("getOptimizedDesign", &Optimizer::getOptimizedDesign);
 
   m.def("_petsc_initialize", &_petsc_initialize);
   m.def("_petsc_initialized", &_petsc_initialized);

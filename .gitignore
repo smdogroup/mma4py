@@ -3,3 +3,4 @@ build
 *.so
 *.pyc
 __pycache__
+*.log

@@ -56,6 +56,8 @@ class MMA {
 
   // Sets outer movelimits on all primal design variables
   // This is often requires to prevent the solver from oscilating
+  PetscErrorCode SetOuterMovelimit(Vec Xmin0, Vec Xmax0, PetscScalar movelim,
+                                   Vec x, Vec xmin, Vec xmax);
   PetscErrorCode SetOuterMovelimit(PetscScalar Xmin, PetscScalar Xmax,
                                    PetscScalar movelim, Vec x, Vec xmin,
                                    Vec xmax);

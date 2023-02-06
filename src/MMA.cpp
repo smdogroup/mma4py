@@ -388,6 +388,31 @@ PetscErrorCode MMA::SetRobustAsymptotesType(PetscInt val) {
   return ierr;
 }
 
+PetscErrorCode MMA::SetOuterMovelimit(Vec Xmin0, Vec Xmax0, PetscScalar movlim,
+                                      Vec x, Vec xmin, Vec xmax) {
+  PetscErrorCode ierr = 0;
+
+  PetscScalar *Xmin0_vals, *Xmax0_vals;
+  PetscScalar *xv, *xmiv, *xmav;
+  PetscInt nloc;
+  VecGetLocalSize(x, &nloc);
+  VecGetArray(x, &xv);
+  VecGetArray(xmin, &xmiv);
+  VecGetArray(xmax, &xmav);
+  VecGetArray(Xmin0, &Xmin0_vals);
+  VecGetArray(Xmax0, &Xmax0_vals);
+  for (PetscInt i = 0; i < nloc; i++) {
+    xmav[i] = Min(Xmax0_vals[i], xv[i] + movlim);
+    xmiv[i] = Max(Xmin0_vals[i], xv[i] - movlim);
+  }
+  VecRestoreArray(x, &xv);
+  VecRestoreArray(xmin, &xmiv);
+  VecRestoreArray(xmax, &xmav);
+  VecRestoreArray(Xmin0, &Xmin0_vals);
+  VecRestoreArray(Xmax0, &Xmax0_vals);
+  return ierr;
+}
+
 PetscErrorCode MMA::SetOuterMovelimit(PetscScalar Xmin, PetscScalar Xmax,
                                       PetscScalar movlim, Vec x, Vec xmin,
                                       Vec xmax) {

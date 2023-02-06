@@ -12,6 +12,12 @@ class Prob(Problem):
         self.ncon = 1
         return
 
+    def getVarsAndBounds(self, x, lb, ub):
+        x[:] = 0.95
+        lb[:] = 0.0
+        ub[:] = 1.0
+        return
+
     def evalObjCon(self, x, cons):
         _obj = np.array([np.sum(x**2)], dtype=float)
         _con = np.array([np.sum(x, dtype=float)])
@@ -38,5 +44,8 @@ for i in range(nvars % comm.size):
     nvars_l += 1
 
 prob = Prob(comm, nvars, nvars_l)
-opt = Optimizer(prob)
+opt = Optimizer(prob, "mma4py.log")
 opt.optimize(10)
+
+xopt = opt.getOptimizedDesign()
+print("%20.10e" % (np.sum(xopt)))

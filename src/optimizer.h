@@ -38,6 +38,7 @@ PetscErrorCode bind_petsc_vec_to_array(Vec* x, const MPI_Comm comm,
  * @brief An abstract optimization problem class, to perform optimization,
  * user needs to implement the following methods:
  *
+ *  - getVarsAndBounds()
  *  - evalObjCon()
  *  - evalObjConGrad()
  *
@@ -46,7 +47,7 @@ PetscErrorCode bind_petsc_vec_to_array(Vec* x, const MPI_Comm comm,
  * sizes of these vectors are the same.
  *
  * Note2: Assume constraints take the following form:
- *        c(x) >= 0
+ *        c(x) <= 0
  */
 class Problem {
  public:
@@ -70,10 +71,19 @@ class Problem {
   virtual ~Problem() = default;
 
   /**
+   * @brief Set initial design x and its lower/upper bounds
+   *
+   * @param x0 initial design
+   * @param lb lower bound
+   * @param ub upper bound
+   */
+  virtual void getVarsAndBounds(ndarray_t x0, ndarray_t lb, ndarray_t ub) = 0;
+
+  /**
    * @brief Evaluate objective and constraints
    *
    * @param x design variable, 1d array
-   * @param cons constraints with the form c(x) >= 0, 1d array
+   * @param cons constraints with the form c(x) <= 0, 1d array
    * @return objective
    */
   virtual double evalObjCon(ndarray_t x, ndarray_t cons) = 0;
@@ -117,7 +127,7 @@ class Problem {
  */
 class Optimizer final {
  public:
-  Optimizer(Problem* prob);
+  Optimizer(Problem* prob, const char* log_name);
   ~Optimizer();
 
   /**
@@ -128,13 +138,23 @@ class Optimizer final {
    */
   PetscErrorCode optimize(int niter);
 
+  /**
+   * @brief Return xopt
+   *
+   * @return ndarray_t xopt
+   */
+  ndarray_t getOptimizedDesign();
+
  private:
   Problem* prob;
+  const char* log_name;
+  FILE* fp;
   double obj;  // objective value
   Vec x, g;    // design variable and objective gradient
   Vec* gcon;   // constraint function gradients
+  Vec lb, ub;  // upper and lower bounds of x
 
-  ndarray_t np_x, np_cons, np_g, np_gcon;  // numpy arrays
+  ndarray_t np_x, np_cons, np_g, np_gcon, np_lb, np_ub;  // numpy arrays
 };
 
 #endif
