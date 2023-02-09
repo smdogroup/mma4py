@@ -3,32 +3,16 @@ from pybind11.setup_helpers import Pybind11Extension
 import mpi4py
 from glob import glob
 from subprocess import check_output
-from os.path import join, realpath, isdir
-import os
+from os.path import join, realpath
+from petsc import get_petsc_dir
 
 
 def get_petsc_dirs():
-    petsc_prefix = realpath(join(os.environ["HOME"], "packages", "petsc"))
-    if not isdir(petsc_prefix):
-        petsc_prefix = os.environ.get("MMA4PY_PETSC_PREFIX")
-        if petsc_prefix is None:
-            print(
-                "Can't find PETSc installation directory, please specify the "
-                "path by setting environment variable MMA4PY_PETSC_PREFIX\n"
-                "export MMA4PY_PETSC_PREFIX=..."
-            )
-            exit(-1)
+    # Find petsc
+    petsc_prefix = get_petsc_dir()
 
     petsc_inc_dir = realpath(join(petsc_prefix, "include"))
     petsc_lib_dir = realpath(join(petsc_prefix, "lib"))
-
-    if not isdir(petsc_lib_dir):
-        print("Can't find %s" % petsc_lib_dir)
-        exit(-1)
-
-    if not isdir(petsc_inc_dir):
-        print("Can't find %s" % petsc_inc_dir)
-        exit(-1)
 
     return petsc_inc_dir, petsc_lib_dir
 
@@ -48,9 +32,6 @@ def get_mpi_flags(mpiexec="mpicxx"):
             libs.append(flag[2:])
 
     return inc_dirs, lib_dirs, libs
-
-
-inc_dirs, lib_dirs, libs = get_mpi_flags()
 
 
 if __name__ == "__main__":
@@ -79,9 +60,13 @@ if __name__ == "__main__":
         name="mma4py",
         version="0.1.0",
         description="a parallel MMA optimizer with python wrapper",
+        url="https://github.com/aaronyicongfu/mma4py",
         author="Yicong Fu",
         author_email="fuyicong1996@gmail.com",
+        license="Apache-2.0 license",
+        packages=["mma4py"],
         ext_package="mma4py",
         ext_modules=ext_modules,
         include_dirs=include_dirs,
+        # install_requires=["pybind11", "mpi4py", "petsc"],
     )

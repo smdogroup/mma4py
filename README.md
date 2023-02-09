@@ -51,10 +51,18 @@ See [examples/quadratic/quad-min.py](examples/quadratic/quad-min.py) for more de
 - MPI, mpi4py, pybind11
 
 
-# Install
+# Installation
 
-- First, you'll need to have a working installation of PETSc.
-Please refer to [PETSc documentation](https://petsc.org/release/install/install_tutorial/) for instruction.
+## Install PETSc
+
+First, install PETSc from source:
+- Obtain source code from https://gitlab.com/petsc/petsc,
+- Configure PETSc by ```./configure --with-mpi=1 --with-debugging=0 --prefix=/your/empty/dir/to/install/petsc```,
+- Follow the steps in the print out.
+
+Please refer to [PETSc documentation](https://petsc.org/release/install/install_tutorial/) for detailed instruction.
+
+## Install ```mma4py```
 
 - Next, to compile ```mma4py```, first specify the PETSc installation path by ```export MMA4PY_PETSC_PREFIX=/path/to/petsc/install```, then do ```make``` at the root directory of ```mma4py```.
 
