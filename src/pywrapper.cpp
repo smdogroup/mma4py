@@ -64,14 +64,21 @@ PYBIND11_MODULE(pywrapper, m) {
   }
 
   py::class_<Problem, PyProblem>(m, "Problem")
-      .def(py::init<py::object, int, int, int>())
-      .def("getVarsAndBounds", &Problem::getVarsAndBounds)
-      .def("evalObjCon", &Problem::evalObjCon)
-      .def("evalObjConGrad", &Problem::evalObjConGrad);
+      .def(py::init<py::object, int, int, int>(), py::arg("comm"),
+           py::arg("nvars"), py::arg("nvars_l"), py::arg("ncons"))
+      .def("getVarsAndBounds", &Problem::getVarsAndBounds, py::arg("x0"),
+           py::arg("lb"), py::arg("ub"))
+      .def("evalObjCon", &Problem::evalObjCon, py::arg("x"), py::arg("cons"))
+      .def("evalObjConGrad", &Problem::evalObjConGrad, py::arg("x"),
+           py::arg("g"), py::arg("gcon"));
 
   py::class_<Optimizer>(m, "Optimizer")
-      .def(py::init<Problem*, const char*>())
-      .def("optimize", &Optimizer::optimize)
+      .def(py::init<Problem*, const char*>(), py::arg("prob"),
+           py::arg("log_name") = "mma4py.log")
+      .def("checkGradients", &Optimizer::checkGradients, py::arg("seed") = 0u,
+           py::arg("h") = 1e-6)
+      .def("optimize", &Optimizer::optimize, py::arg("niter"),
+           py::arg("verbose") = false)
       .def("getOptimizedDesign", &Optimizer::getOptimizedDesign);
 
   m.def("_petsc_initialize", &_petsc_initialize);

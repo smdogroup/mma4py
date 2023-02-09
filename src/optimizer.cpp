@@ -92,7 +92,78 @@ Optimizer::~Optimizer() {
   delete[] gcon;
 }
 
-PetscErrorCode Optimizer::optimize(int niter) {
+void Optimizer::checkGradients(unsigned int seed, double h) {
+  int nvars_l = prob->get_num_vars_local();
+  int ncons = prob->get_num_cons();
+
+  // Create auxiliary variables
+  ndarray_t x(nvars_l), p(nvars_l);
+  ndarray_t g(nvars_l), gcon(ncons * nvars_l);
+  ndarray_t dcdx_fd(ncons), c(ncons);
+  gcon = gcon.reshape({ncons, nvars_l});
+
+  // Set x0
+  prob->getVarsAndBounds(x, np_lb, np_ub);
+
+  // Eval f(x) and c(x)
+  double fx = prob->evalObjCon(x, c);
+
+  // Eval f(x + hp) and c(x + hp)
+  std::srand(seed);
+  double* xvals = (double*)x.data();
+  double* pvals = (double*)p.data();
+  for (int i = 0; i < nvars_l; i++) {
+    pvals[i] = (double)std::rand() / RAND_MAX;
+    xvals[i] += h * pvals[i];
+  }
+
+  // compute dfdx and dcdx via fd
+  double dfdx_fd = (prob->evalObjCon(x, dcdx_fd) - fx) / h;
+  double* cvals = (double*)c.data();
+  double* dcvals = (double*)dcdx_fd.data();
+  for (int i = 0; i < ncons; i++) {
+    dcvals[i] = (dcvals[i] - cvals[i]) / h;
+  }
+
+  // Reset x
+  prob->getVarsAndBounds(x, np_lb, np_ub);
+
+  // Compute analytical gradients
+  prob->evalObjConGrad(x, g, gcon);
+  double* gvals = (double*)g.data();
+  double* gconvals = (double*)gcon.data();
+
+  double dfdx = 0.0;
+  double dcdx[ncons];
+  for (int j = 0; j < ncons; j++) {
+    dcdx[j] = 0.0;
+  }
+
+  for (int i = 0; i < nvars_l; i++) {
+    dfdx += pvals[i] * gvals[i];
+    for (int j = 0; j < ncons; j++) {
+      dcdx[j] += pvals[i] * gconvals[j * nvars_l + i];
+    }
+  }
+
+  MPI_Comm comm = prob->get_mpi_comm();
+  MPI_Allreduce(&dfdx, &dfdx, 1, MPI_DOUBLE, MPI_SUM, comm);
+  MPI_Allreduce(dcdx, dcdx, ncons, MPI_DOUBLE, MPI_SUM, comm);
+
+  PetscCallAbort(comm, PetscPrintf(comm, "Check gradients:\n"));
+  PetscCallAbort(comm, PetscPrintf(comm, "%8s%20s%20s%20s\n", "", "fd", "exact",
+                                   "rel. err."));
+  PetscCallAbort(comm, PetscPrintf(comm, "%8s%20.10e%20.10e%20.10e\n", "obj",
+                                   dfdx_fd, dfdx, ((dfdx_fd)-dfdx) / dfdx));
+  for (int i = 0; i < ncons; i++) {
+    PetscCallAbort(
+        comm, PetscPrintf(comm, "%3s[%3d]%20.10e%20.10e%20.10e\n", "con", i,
+                          dcvals[i], dcdx[i], (dcvals[i] - dcdx[i]) / dcdx[i]));
+  }
+  return;
+}
+
+PetscErrorCode Optimizer::optimize(int niter, bool verbose) {
   MPI_Comm comm = prob->get_mpi_comm();
   int nvars = prob->get_num_vars();
   int nvars_l = prob->get_num_vars_local();
@@ -162,10 +233,19 @@ PetscErrorCode Optimizer::optimize(int niter) {
     if (iter % 10 == 0) {
       PetscCall(PetscFPrintf(comm, fp, "\n%6s%20s%20s%20s%20s%20s\n", "iter",
                              "obj", "KKT_l2", "KKT_linf", "|x|_1", "infeas"));
+      if (verbose) {
+        PetscCall(PetscPrintf(comm, "\n%6s%20s%20s%20s%20s%20s\n", "iter",
+                              "obj", "KKT_l2", "KKT_linf", "|x|_1", "infeas"));
+      }
     }
     PetscCall(PetscFPrintf(comm, fp, "%6d%20.10e%20.10e%20.10e%20.10e%20.10e\n",
                            iter, obj, kkterr_l2, kkterr_linf, x_l1, infeas));
     fflush(fp);
+
+    if (verbose) {
+      PetscCall(PetscPrintf(comm, "%6d%20.10e%20.10e%20.10e%20.10e%20.10e\n",
+                            iter, obj, kkterr_l2, kkterr_linf, x_l1, infeas));
+    }
 
     iter++;
   }

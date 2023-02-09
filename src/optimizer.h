@@ -131,12 +131,19 @@ class Optimizer final {
   ~Optimizer();
 
   /**
+   * @brief Check the gradients by finite differencing
+   *
+   * @param h finite difference step
+   */
+  void checkGradients(unsigned int seed = 0u, double h = 1e-6);
+
+  /**
    * @brief Perform optimization
    *
-   * @param prob optimization problem instance
    * @param niter number of iterations
+   * @param verbose print optimization history to stdout or not
    */
-  PetscErrorCode optimize(int niter);
+  PetscErrorCode optimize(int niter, bool verbose = false);
 
   /**
    * @brief Return xopt

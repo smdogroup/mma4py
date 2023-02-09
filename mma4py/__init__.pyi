@@ -69,7 +69,7 @@ class Problem:
         pass
 
 class Optimizer:
-    def __init__(self, prob, log_name) -> None:
+    def __init__(self, prob, log_name="mma4py.log") -> None:
         """
         Initialize MMA optimizer.
 
@@ -78,7 +78,16 @@ class Optimizer:
             log_name: string, output log file name
         """
         pass
-    def optimize(self, niter) -> int:
+    def checkGradients(self, seed=0, h=1e-6) -> None:
+        """
+        Check the gradient using finite difference.
+
+        Args:
+            seed: int, seed for random number generator
+            h: finite difference step
+        """
+        pass
+    def optimize(self, niter, verbose=False) -> int:
         """
         Execute optimization.
 
