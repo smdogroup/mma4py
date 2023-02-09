@@ -12,6 +12,8 @@ To use ```mma4py```, simply define a custom class that implements the evaluation
 An illustrative code snippet is shown below:
 
 ```python
+from mma4py import Problem, Optimizer
+
 class MyProb(Problem):
     def __init__(self, comm, nvars, nvars_l):
         ...
