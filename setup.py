@@ -3,16 +3,30 @@ from pybind11.setup_helpers import Pybind11Extension
 import mpi4py
 from glob import glob
 from subprocess import check_output
-from os.path import join, realpath
-from petsc import get_petsc_dir
+import os
+from os.path import join, realpath, isdir
 
 
 def get_petsc_dirs():
-    # Find petsc
-    petsc_prefix = get_petsc_dir()
+    petsc_prefix = os.environ.get("MMA4PY_PETSC_PREFIX")
+    if petsc_prefix is None:
+        print(
+            "Can't find PETSc installation directory, please specify the "
+            "path by setting environment variable MMA4PY_PETSC_PREFIX\n"
+            "export MMA4PY_PETSC_PREFIX=..."
+        )
+        exit(-1)
 
     petsc_inc_dir = realpath(join(petsc_prefix, "include"))
     petsc_lib_dir = realpath(join(petsc_prefix, "lib"))
+
+    if not isdir(petsc_lib_dir):
+        print("Can't find %s" % petsc_lib_dir)
+        exit(-1)
+
+    if not isdir(petsc_inc_dir):
+        print("Can't find %s" % petsc_inc_dir)
+        exit(-1)
 
     return petsc_inc_dir, petsc_lib_dir
 
@@ -68,5 +82,4 @@ if __name__ == "__main__":
         ext_package="mma4py",
         ext_modules=ext_modules,
         include_dirs=include_dirs,
-        # install_requires=["pybind11", "mpi4py", "petsc"],
     )

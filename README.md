@@ -45,27 +45,12 @@ xopt = opt.getOptimizedDesign()
 
 See [examples/quadratic/quad-min.py](examples/quadratic/quad-min.py) for more details.
 
-
-# Dependencies
-- Portable, Extensible Toolkit for Scientific Computation ([PETSc](https://petsc.org/release/))
-- MPI, mpi4py, pybind11
-
-
 # Installation
 
-## Install PETSc
-
-First, install PETSc from source:
-- Obtain source code from https://gitlab.com/petsc/petsc,
-- Configure PETSc by ```./configure --with-mpi=1 --with-debugging=0 --prefix=/your/empty/dir/to/install/petsc```,
-- Follow the steps in the print out.
-
-Please refer to [PETSc documentation](https://petsc.org/release/install/install_tutorial/) for detailed instruction.
-
-## Install ```mma4py```
-
-- Next, to compile ```mma4py```, first specify the PETSc installation path by ```export MMA4PY_PETSC_PREFIX=/path/to/petsc/install```, then do ```make``` at the root directory of ```mma4py```.
-
-- To use ```mma4py``` in python from anywhere, add
-```export PYTHONPATH=${PYTHONPATH}:~/git/mma4py```
-to your shell dot file (i.g., ```.bashrc, .zshrc, etc.```).
+- First, install python dependencies by ```pip install -r requirements.txt```
+- Then, install [PETSc](https://petsc.org/release/):
+    - Obtain source code from https://gitlab.com/petsc/petsc
+    - Configure PETSc by ```./configure --with-mpi=1 --with-debugging=0 --prefix=dir/to/install/petsc```, then follow the steps in the print out
+- Install ```mma4py```:
+    - Specify location of PETSc by ```export MMA4PY_PETSC_PREFIX=dir/to/install/petsc```
+    - In root directory of ```mma4py```, do ```pip install .```
