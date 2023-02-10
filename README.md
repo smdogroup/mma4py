@@ -50,7 +50,7 @@ See [examples/quadratic/quad-min.py](examples/quadratic/quad-min.py) for more de
 - First, install python dependencies by ```pip install -r requirements.txt```
 - Then, install [PETSc](https://petsc.org/release/):
     - Obtain source code from https://gitlab.com/petsc/petsc
-    - Configure PETSc by ```./configure --with-mpi=1 --with-debugging=0 --prefix=dir/to/install/petsc```, then follow the steps in the print out
+    - Configure PETSc by ```./configure --with-mpi=1 --with-debugging=0 --prefix=dir/to/install/petsc```, then follow the steps in the printout
 - Install ```mma4py```:
     - Specify location of PETSc by ```export MMA4PY_PETSC_PREFIX=dir/to/install/petsc```
     - In root directory of ```mma4py```, do ```pip install .```
