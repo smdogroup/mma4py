@@ -1,0 +1,7 @@
+build
+.vscode
+*.so
+*.pyc
+__pycache__
+*.log
+mma4py.egg-info

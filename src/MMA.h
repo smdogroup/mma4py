@@ -21,16 +21,15 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 class MMA {
  public:
   // Construct using defaults subproblem penalization
-  MMA(MPI_Comm comm, PetscInt n, PetscInt m, Vec x);
+  MMA(PetscInt n, PetscInt m, Vec x);
   // User defined subproblem penalization
-  MMA(MPI_Comm comm, PetscInt n, PetscInt m, Vec x, PetscScalar* a,
-      PetscScalar* c, PetscScalar* d);
+  MMA(PetscInt n, PetscInt m, Vec x, PetscScalar* a, PetscScalar* c,
+      PetscScalar* d);
   // Initialize with restart from itr
-  MMA(MPI_Comm comm, PetscInt n, PetscInt m, PetscInt itr, Vec xo1, Vec xo2,
-      Vec U, Vec L);
+  MMA(PetscInt n, PetscInt m, PetscInt itr, Vec xo1, Vec xo2, Vec U, Vec L);
   // Initialize with restart and specify subproblem parameters
-  MMA(MPI_Comm comm, PetscInt n, PetscInt m, PetscInt itr, Vec xo1, Vec xo2,
-      Vec U, Vec L, PetscScalar* a, PetscScalar* c, PetscScalar* d);
+  MMA(PetscInt n, PetscInt m, PetscInt itr, Vec xo1, Vec xo2, Vec U, Vec L,
+      PetscScalar* a, PetscScalar* c, PetscScalar* d);
   // Destructor
   ~MMA();
 
@@ -57,6 +56,8 @@ class MMA {
 
   // Sets outer movelimits on all primal design variables
   // This is often requires to prevent the solver from oscilating
+  PetscErrorCode SetOuterMovelimit(Vec Xmin0, Vec Xmax0, PetscScalar movelim,
+                                   Vec x, Vec xmin, Vec xmax);
   PetscErrorCode SetOuterMovelimit(PetscScalar Xmin, PetscScalar Xmax,
                                    PetscScalar movelim, Vec x, Vec xmin,
                                    Vec xmax);
