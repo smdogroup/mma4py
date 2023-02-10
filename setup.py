@@ -77,7 +77,7 @@ if __name__ == "__main__":
         url="https://github.com/aaronyicongfu/mma4py",
         author="Yicong Fu",
         author_email="fuyicong1996@gmail.com",
-        license="Apache-2.0 license",
+        license="LGPL 2.1 license",
         packages=["mma4py"],
         ext_package="mma4py",
         ext_modules=ext_modules,
