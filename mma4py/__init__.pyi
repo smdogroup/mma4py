@@ -1,5 +1,6 @@
 from __future__ import annotations
 import numpy
+from typing import overload
 
 __all__ = ["Optimizer", "Problem"]
 
@@ -19,12 +20,24 @@ class Problem:
             c(x) <= 0
     """
 
+    @overload
     def __init__(self, comm, nvars, nvars_l, ncons) -> None:
         """
         Initializer.
 
         Args:
             comm: MPI.Comm
+            nvars: int, size of the global design vector x
+            nvars_l: int, size of the local portion of x at current MPI processor
+            ncons: number of constraints
+        """
+        pass
+    @overload
+    def __init__(self, nvars, nvars_l, ncons) -> None:
+        """
+        Initializer without MPI communicator.
+
+        Args:
             nvars: int, size of the global design vector x
             nvars_l: int, size of the local portion of x at current MPI processor
             ncons: number of constraints

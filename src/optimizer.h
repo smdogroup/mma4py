@@ -61,6 +61,10 @@ class Problem {
         nvars(nvars),
         nvars_l(nvars_l),
         ncons(ncons){};
+  Problem(int nvars, int nvars_l, int ncons)
+      : nvars(nvars), nvars_l(nvars_l), ncons(ncons) {
+    comm = MPI_COMM_SELF;
+  };
 
   /**
    * @brief Destructor
@@ -93,7 +97,8 @@ class Problem {
    *
    * @param x design variable, 1d array
    * @param g objective gradient, 1d array
-   * @param gcon constraint gradients, 2d array, gcon[i, :] for i-th constraint
+   * @param gcon constraint gradients, 2d array, gcon[i, :] for i-th
+   * constraint
    */
   virtual void evalObjConGrad(ndarray_t x, ndarray_t g, ndarray_t gcon) = 0;
 

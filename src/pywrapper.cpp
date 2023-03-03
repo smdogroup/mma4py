@@ -66,6 +66,8 @@ PYBIND11_MODULE(pywrapper, m) {
   py::class_<Problem, PyProblem>(m, "Problem")
       .def(py::init<py::object, int, int, int>(), py::arg("comm"),
            py::arg("nvars"), py::arg("nvars_l"), py::arg("ncons"))
+      .def(py::init<int, int, int>(), py::arg("nvars"), py::arg("nvars_l"),
+           py::arg("ncons"))
       .def("getVarsAndBounds", &Problem::getVarsAndBounds, py::arg("x0"),
            py::arg("lb"), py::arg("ub"))
       .def("evalObjCon", &Problem::evalObjCon, py::arg("x"), py::arg("cons"))
