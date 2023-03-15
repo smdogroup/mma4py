@@ -100,12 +100,16 @@ class Optimizer:
             h: finite difference step
         """
         pass
-    def optimize(self, niter, verbose=False) -> int:
+    def optimize(
+        self, niter, verbose=False, movelim=0.2, atol_l2=1e-8, atol_linf=1e-8
+    ) -> int:
         """
         Execute optimization.
 
         Args:
             niter: int, number of iterations
+            verbose: if run optimization verbosely or not
+            movelim: move limit for the design variable
 
         Return:
             error code, 0 is success
@@ -118,7 +122,14 @@ class Optimizer:
         Return:
             1d numpy array, optimized x
         """
-    pass
+        pass
+    def getSuccessFlag(self) -> int:
+        """
+        Get the Success Flag
+        Return:
+            int, success flag, 0 is success, -1 is hit iteration limit
+        """
+        pass
 
 def _petsc_initialize() -> None:
     pass

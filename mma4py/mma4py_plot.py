@@ -29,16 +29,13 @@ def mma4py_plot_log(ax, log_path):
     # Manually set legends
     lns = l0 + l1 + l2 + l3
     labs = [l.get_label() for l in lns]
-    ax.legend(lns, labs, loc=0)
+    ax.legend(lns, labs, loc=0, frameon=False)
 
-    ax.set_xlabel("iter")
-    ax.set_ylabel("obj")
+    ax.set_xlabel("iterations")
+    ax.set_ylabel("objective")
     ax2.set_xlabel("opt/feas criteria")
 
-    ax.spines["top"].set_visible(False)
-    ax2.spines["top"].set_visible(False)
-
-    return
+    return ax2
 
 
 if __name__ == "__main__":
@@ -49,5 +46,5 @@ if __name__ == "__main__":
     args = p.parse_args()
 
     fig, ax = plt.subplots(figsize=(6.4, 4.8), layout="constrained")
-    mma4py_plot_log(args.filename)
+    mma4py_plot_log(ax, args.filename)
     plt.show()

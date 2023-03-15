@@ -1,6 +1,7 @@
 from mma4py import Problem, Optimizer
 from mpi4py import MPI
 import numpy as np
+import argparse
 
 
 class Prob(Problem):
@@ -46,6 +47,12 @@ class Prob(Problem):
 
 
 if __name__ == "__main__":
+    p = argparse.ArgumentParser()
+    p.add_argument("--maxit", default=200, type=int)
+    p.add_argument("--movelim", default=0.1, type=float)
+    p.add_argument("--tol", default=1e-8, type=float)
+    args = p.parse_args()
+
     # MPI communicator
     comm = MPI.COMM_WORLD
 
@@ -66,13 +73,21 @@ if __name__ == "__main__":
     opt.checkGradients(seed=0, h=1e-6)
 
     # Run optimization
-    opt.optimize(niter=100, verbose=True)
+    opt.optimize(
+        niter=args.maxit,
+        verbose=True,
+        movelim=args.movelim,
+        atol_l2=args.tol,
+        atol_linf=args.tol,
+    )
 
     # Get distributed optimized solution
     xopt = opt.getOptimizedDesign()
+    flag = opt.getSuccessFlag()
 
     # Perform MPI communication to obtain the global solution vector
     xopt_g = np.empty(nvars)
     comm.Allgatherv(xopt, xopt_g)
     if comm.rank == 0:
+        print("success flag:", flag)
         print("\nOptimized solution:\n|xopt|_1: %20.10e" % (np.sum(xopt_g)))

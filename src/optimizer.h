@@ -147,8 +147,12 @@ class Optimizer final {
    *
    * @param niter number of iterations
    * @param verbose print optimization history to stdout or not
+   * @param movelim move limit for the design variables
+   * @param atol_l2 absolute KKT tolerance in 2-norm
+   * @param atol_linf absolute KKT tolerance in infinity norm
    */
-  PetscErrorCode optimize(int niter, bool verbose = false);
+  PetscErrorCode optimize(int niter, bool verbose = false, double movelim = 0.2,
+                          double atol_l2 = 1e-8, double atol_linf = 1e-8);
 
   /**
    * @brief Return xopt
@@ -156,6 +160,13 @@ class Optimizer final {
    * @return ndarray_t xopt
    */
   ndarray_t getOptimizedDesign();
+
+  /**
+   * @brief Get the Success Flag
+   *
+   * @return int success flag, 0 is success, -1 is hit iteration limit
+   */
+  int getSuccessFlag();
 
  private:
   Problem* prob;
@@ -167,6 +178,8 @@ class Optimizer final {
   Vec lb, ub;  // upper and lower bounds of x
 
   ndarray_t np_x, np_cons, np_g, np_gcon, np_lb, np_ub;  // numpy arrays
+
+  int success_flag;
 };
 
 #endif

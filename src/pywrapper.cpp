@@ -80,8 +80,10 @@ PYBIND11_MODULE(pywrapper, m) {
       .def("checkGradients", &Optimizer::checkGradients, py::arg("seed") = 0u,
            py::arg("h") = 1e-6)
       .def("optimize", &Optimizer::optimize, py::arg("niter"),
-           py::arg("verbose") = false)
-      .def("getOptimizedDesign", &Optimizer::getOptimizedDesign);
+           py::arg("verbose") = false, py::arg("movelim") = 0.2,
+           py::arg("atol_l2") = 1e-8, py::arg("atol_linf") = 1e-8)
+      .def("getOptimizedDesign", &Optimizer::getOptimizedDesign)
+      .def("getSuccessFlag", &Optimizer::getSuccessFlag);
 
   m.def("_petsc_initialize", &_petsc_initialize);
   m.def("_petsc_initialized", &_petsc_initialized);

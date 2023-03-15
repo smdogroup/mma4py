@@ -72,6 +72,8 @@ Optimizer::Optimizer(Problem* prob, const char* log_name)
                                                  &gcon_data[offset]));
     offset += nvars_l;
   }
+
+  success_flag = -1;
 }
 
 Optimizer::~Optimizer() {
@@ -163,14 +165,12 @@ void Optimizer::checkGradients(unsigned int seed, double h) {
   return;
 }
 
-PetscErrorCode Optimizer::optimize(int niter, bool verbose) {
+PetscErrorCode Optimizer::optimize(int niter, bool verbose, double movelim,
+                                   double atol_l2, double atol_linf) {
   MPI_Comm comm = prob->get_mpi_comm();
   int nvars = prob->get_num_vars();
   int nvars_l = prob->get_num_vars_local();
   int ncons = prob->get_num_cons();
-
-  // Hard-code parameters
-  double movelim = 0.2;  // TODO: set this from option dictionary
 
   // Set initial design and bounds
   prob->getVarsAndBounds(np_x, np_lb, np_ub);
@@ -247,6 +247,11 @@ PetscErrorCode Optimizer::optimize(int niter, bool verbose) {
                             iter, obj, kkterr_l2, kkterr_linf, x_l1, infeas));
     }
 
+    // Success!
+    if (abs(kkterr_l2) < atol_l2 or abs(kkterr_linf) < atol_linf) {
+      success_flag = 0;
+      break;
+    }
     iter++;
   }
 
@@ -257,3 +262,4 @@ PetscErrorCode Optimizer::optimize(int niter, bool verbose) {
 }
 
 ndarray_t Optimizer::getOptimizedDesign() { return np_x; }
+int Optimizer::getSuccessFlag() { return success_flag; }
