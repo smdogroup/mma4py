@@ -66,6 +66,8 @@ PYBIND11_MODULE(pywrapper, m) {
   py::class_<Problem, PyProblem>(m, "Problem")
       .def(py::init<py::object, int, int, int>(), py::arg("comm"),
            py::arg("nvars"), py::arg("nvars_l"), py::arg("ncons"))
+      .def(py::init<int, int, int>(), py::arg("nvars"), py::arg("nvars_l"),
+           py::arg("ncons"))
       .def("getVarsAndBounds", &Problem::getVarsAndBounds, py::arg("x0"),
            py::arg("lb"), py::arg("ub"))
       .def("evalObjCon", &Problem::evalObjCon, py::arg("x"), py::arg("cons"))
@@ -78,8 +80,10 @@ PYBIND11_MODULE(pywrapper, m) {
       .def("checkGradients", &Optimizer::checkGradients, py::arg("seed") = 0u,
            py::arg("h") = 1e-6)
       .def("optimize", &Optimizer::optimize, py::arg("niter"),
-           py::arg("verbose") = false)
-      .def("getOptimizedDesign", &Optimizer::getOptimizedDesign);
+           py::arg("verbose") = false, py::arg("movelim") = 0.2,
+           py::arg("atol_l2") = 1e-8, py::arg("atol_linf") = 1e-8)
+      .def("getOptimizedDesign", &Optimizer::getOptimizedDesign)
+      .def("getSuccessFlag", &Optimizer::getSuccessFlag);
 
   m.def("_petsc_initialize", &_petsc_initialize);
   m.def("_petsc_initialized", &_petsc_initialized);

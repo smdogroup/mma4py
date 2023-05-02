@@ -1,5 +1,6 @@
 from __future__ import annotations
 import numpy
+from typing import overload
 
 __all__ = ["Optimizer", "Problem"]
 
@@ -19,12 +20,24 @@ class Problem:
             c(x) <= 0
     """
 
+    @overload
     def __init__(self, comm, nvars, nvars_l, ncons) -> None:
         """
         Initializer.
 
         Args:
             comm: MPI.Comm
+            nvars: int, size of the global design vector x
+            nvars_l: int, size of the local portion of x at current MPI processor
+            ncons: number of constraints
+        """
+        pass
+    @overload
+    def __init__(self, nvars, nvars_l, ncons) -> None:
+        """
+        Initializer without MPI communicator.
+
+        Args:
             nvars: int, size of the global design vector x
             nvars_l: int, size of the local portion of x at current MPI processor
             ncons: number of constraints
@@ -87,12 +100,16 @@ class Optimizer:
             h: finite difference step
         """
         pass
-    def optimize(self, niter, verbose=False) -> int:
+    def optimize(
+        self, niter, verbose=False, movelim=0.2, atol_l2=1e-8, atol_linf=1e-8
+    ) -> int:
         """
         Execute optimization.
 
         Args:
             niter: int, number of iterations
+            verbose: if run optimization verbosely or not
+            movelim: move limit for the design variable
 
         Return:
             error code, 0 is success
@@ -105,7 +122,14 @@ class Optimizer:
         Return:
             1d numpy array, optimized x
         """
-    pass
+        pass
+    def getSuccessFlag(self) -> int:
+        """
+        Get the Success Flag
+        Return:
+            int, success flag, 0 is success, -1 is hit iteration limit
+        """
+        pass
 
 def _petsc_initialize() -> None:
     pass
